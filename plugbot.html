@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlugBot | Powered by MXD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --dim: #555;
+      --accent: #000000;
+      --neon: #00f5ff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      color: var(--accent);
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 3px solid var(--accent);
+      width: 0;
+      animation: typing 2.5s steps(20, end) forwards, blink 0.7s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink {
+      50% { border-color: transparent }
+    }
+
+    @media (min-width: 768px) {
+      .hero h1 {
+        font-size: 5rem;
+      }
+    }
+
+    .hero p {
+      max-width: 680px;
+      margin: 0 auto 2rem;
+      font-size: 1.1rem;
+      color: var(--dim);
+    }
+
+    .cta-button {
+      background: var(--accent);
+      color: #fff;
+      padding: 1rem 2rem;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-button:hover {
+      background-color: #222;
+      transform: scale(1.03);
+      box-shadow: 0 0 25px var(--neon);
+    }
+
+    .spacer {
+      height: 80px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+    }
+
+    .card {
+      background: #f9f9f9;
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: left;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+    }
+
+    .card p {
+      color: var(--dim);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <section class="section hero">
+    <h1>PlugBot</h1>
+    <p>Your 24/7 automated closer. Qualify leads. Route them to sales. Convert attention into income — hands-free.</p>
+    <a href="customize.html" class="cta-button">Start Building Yours →</a>
+    <div class="spacer"></div>
+  </section>
+
+  <section class="section" data-aos="fade-up">
+    <h2 style="font-size: 2rem; margin-bottom: 2rem;">Who It's For</h2>
+    <div class="grid">
+      <div class="card"><h3>Creators</h3><p>PlugBot turns your followers into booked calls while you focus on content.</p></div>
+      <div class="card"><h3>Closers</h3><p>Only talk to qualified buyers. PlugBot does the filtering for you — no more chasing.</p></div>
+      <div class="card"><h3>Service Brands</h3><p>PlugBot auto-screens leads, saving your team time and pushing real prospects forward.</p></div>
+    </div>
+  </section>
+
+  <section class="section" data-aos="fade-up">
+    <h2 style="font-size: 2rem; margin-bottom: 2rem;">What It Solves</h2>
+    <div class="grid">
+      <div class="card"><h3>Missed Leads</h3><p>Never lose a lead again. PlugBot captures and converts around the clock.</p></div>
+      <div class="card"><h3>Unqualified Traffic</h3><p>Only serious people make it through. That means better convos, higher close rates.</p></div>
+      <div class="card"><h3>Time Suck</h3><p>Let PlugBot handle the Q&A while you focus on delivering results.</p></div>
+    </div>
+  </section>
+
+  <section class="section" data-aos="fade-up">
+    <h2 style="font-size: 2rem; margin-bottom: 2rem;">How It Makes (and Saves) You Money</h2>
+    <div class="grid">
+      <div class="card"><h3>24/7 Assistant</h3><p>PlugBot turns attention into sales — even while you sleep.</p></div>
+      <div class="card"><h3>Save on Payroll</h3><p>Skip the setters and VAs. PlugBot can handle 100 convos at once.</p></div>
+      <div class="card"><h3>Pre-sold Calls</h3><p>Only aligned leads book — no time wasted, just ready buyers.</p></div>
+    </div>
+  </section>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>AOS.init({ once: true });</script>
+</body>
+</html>
