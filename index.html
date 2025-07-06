@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jada's PlugBot | Aligned Closer Academy</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -340,6 +340,7 @@
   </div>
 
   <script>
+    // DOM Elements
     const profileSection = document.getElementById('profileSection');
     const chatContainer = document.getElementById('chatContainer');
     const startChatBtn = document.getElementById('startChatBtn');
@@ -348,19 +349,226 @@
     const userInput = document.getElementById('userInput');
     const sendButton = document.getElementById('sendButton');
     
-    let step = 0;
-    let userData = {};
+    // User data storage
+    let userData = {
+      name: '',
+      age: 0,
+      experience: null,
+      pastProgram: '',
+      investment: null,
+      interest: '',
+      currentIncome: '',
+      desiredIncome: '',
+      savings: null,
+      savingsAmount: 0,
+      credit: null,
+      creditScore: 0,
+      mindset: null
+    };
+    
+    let currentStep = 0;
     let isTyping = false;
     
-    const questions = [
-      "Hey there! I'm Jada's PlugBot. Ready to see if the Aligned Closer Academy is right for you?",
-      "First, what's your name?",
-      "Great! What's your email address?",
-      "How old are you? (Must be 18+)",
-      "Do you have $500+ in savings/credit to invest in your growth?",
-      "What's your biggest goal with high-ticket coaching?",
-      "When's best for your call: morning, afternoon, or evening?"
+    // Positive response detection
+    const isPositive = (input) => ['yes','yea','yep','ya','absolutely','for sure','definitely','certainly','of course','sure'].some(term => 
+      input.toLowerCase().includes(term)
+    );
+    
+    const isNegative = (input) => ['no','nah','nope','never','not really'].some(term => 
+      input.toLowerCase().includes(term)
+    );
+    
+    // Enhanced conversation flow with perfect branching
+    const conversationFlow = [
+      // Initial greeting
+      {
+        question: "Hey there! I'm Jada's PlugBot. Ready to see if the Aligned Closer Academy is right for you?",
+        validator: () => true,
+        store: () => {}
+      },
+      
+      // Name
+      {
+        question: "Great! Let's get started. What's your name?",
+        validator: (input) => input.trim().length >= 2,
+        error: "Please enter a name with at least 2 characters",
+        store: (input) => { userData.name = input.trim(); }
+      },
+      
+      // Age
+      {
+        question: (user) => `Nice to meet you, ${user.name}! How old are you?`,
+        validator: (input) => !isNaN(input) && input > 0,
+        error: "Please enter a valid age",
+        store: (input) => { userData.age = parseInt(input); }
+      },
+      
+      // Experience check
+      {
+        question: (user) => `Got it. ${user.age} is a great age to level up! Have you ever worked online or been part of a program like this before?`,
+        validator: () => true,
+        store: (input) => { 
+          userData.experience = isPositive(input) ? 'yes' : 'no';
+        }
+      },
+      
+      // Follow-up based on experience
+      {
+        condition: (user) => userData.experience === 'yes',
+        question: (user) => "That's awesome experience! What program were you part of and what did you learn?",
+        validator: (input) => input.trim().length > 5,
+        error: "Could you share a bit more about that program?",
+        store: (input) => { userData.pastProgram = input; }
+      },
+      {
+        condition: (user) => userData.experience === 'no',
+        question: (user) => "No worries at all - everyone starts somewhere!",
+        validator: () => true,
+        store: () => {}
+      },
+      
+      // Investment history
+      {
+        question: (user) => {
+          if (userData.experience === 'yes') {
+            return "From that experience, have you invested in coaching or mentorship before?";
+          }
+          return "Have you invested in coaching or mentorship before?";
+        },
+        validator: () => true,
+        store: (input) => { 
+          userData.investment = isPositive(input) ? 'yes' : 'no';
+        }
+      },
+      
+      // Response to investment history
+      {
+        condition: (user) => userData.investment === 'yes',
+        question: (user) => "That's great - you understand the value of investing in yourself!",
+        validator: () => true,
+        store: () => {}
+      },
+      {
+        condition: (user) => userData.investment === 'no',
+        question: (user) => "Perfect time to start - investing in yourself pays the best returns!",
+        validator: () => true,
+        store: () => {}
+      },
+      
+      // Interest
+      {
+        question: (user) => "What specifically about this opportunity caught your interest?",
+        validator: (input) => input.trim().length > 5,
+        error: "Could you share a bit more about what interests you?",
+        store: (input) => { userData.interest = input; }
+      },
+      
+      // Current income
+      {
+        question: (user) => `Love that you're focused on ${userData.interest}. How much are you currently making per month?`,
+        validator: (input) => true,
+        store: (input) => { userData.currentIncome = input; }
+      },
+      
+      // Desired income
+      {
+        question: (user) => `And where would you like to be after fully committing to this opportunity?`,
+        validator: (input) => true,
+        store: (input) => { userData.desiredIncome = input; }
+      },
+      
+      // Savings check
+      {
+        question: (user) => `Got it - moving from ${userData.currentIncome} to ${userData.desiredIncome}. Are you currently working toward a savings or financial goal?`,
+        validator: () => true,
+        store: (input) => { 
+          userData.savings = isPositive(input) ? 'yes' : 'no';
+        }
+      },
+      
+      // Savings amount or credit check
+      {
+        condition: (user) => userData.savings === 'yes',
+        question: (user) => "That's great discipline! About how much do you have available to put toward your goals right now?",
+        validator: (input) => !isNaN(input.replace(/[^0-9]/g, '')),
+        error: "Please enter a valid amount",
+        store: (input) => { 
+          userData.savingsAmount = parseInt(input.replace(/[^0-9]/g, '')); 
+        }
+      },
+      {
+        condition: (user) => userData.savings === 'no',
+        question: (user) => "No problem - are you working on building credit or other financial resources?",
+        validator: () => true,
+        store: (input) => { 
+          userData.credit = isPositive(input) ? 'yes' : 'no';
+        }
+      },
+      
+      // Credit score follow-up
+      {
+        condition: (user) => userData.credit === 'yes',
+        question: (user) => "What credit score or milestone are you aiming for?",
+        validator: (input) => true,
+        store: (input) => { userData.creditScore = input; }
+      },
+      
+      // Mindset check for those with no savings/credit
+      {
+        condition: (user) => userData.savings === 'no' && userData.credit === 'no',
+        question: (user) => "I appreciate your honesty. Would you say you're absolutely committed to achieving your goals no matter what?",
+        validator: () => true,
+        store: (input) => { 
+          userData.mindset = isPositive(input) ? 'serious' : 'unserious';
+        }
+      }
     ];
+    
+    // Perfect scenario handlers
+    const scenarioHandlers = {
+      // Scenario 1: Qualified (has $500+)
+      qualified: (user) => {
+        addMessage(`Based on what you've shared ${user.name}, you're perfectly aligned! Since you're looking to go from ${user.currentIncome} to ${user.desiredIncome}, let's get you scheduled.`, false);
+        showQualifiedCTAs();
+      },
+      
+      // Scenario 4: Building credit
+      buildingCredit: (user) => {
+        addMessage(`Awesome progress toward ${user.creditScore} ${user.name}! That financial awareness is key. Let's connect you with a team member.`, false);
+        showQualifiedCTAs();
+      },
+      
+      // Scenario 5: Has credit
+      hasCredit: (user) => {
+        addMessage(`Perfect ${user.name} - your credit access shows financial readiness. Let's discuss how to turn that into ${user.desiredIncome} monthly.`, false);
+        showQualifiedCTAs();
+      },
+      
+      // Scenario 6: Serious mindset but no funds
+      seriousMindset: (user) => {
+        addMessage(`That's the exact mindset it takes ${user.name}! While we recommend having some financial foundation, here are resources to fast-track your growth:`, false);
+        showResourceLinks();
+      },
+      
+      // Scenario 7: Unserious mindset
+      unseriousMindset: (user) => {
+        addMessage(`Understood ${user.name}. When you're ready to commit, check out these free resources:`, false);
+        showResourceLinks();
+      },
+      
+      // Scenario 2: Underage (handled automatically via financial checks)
+      
+      // Scenario 3: Not interested (handled via negative responses)
+    };
+    
+    // Helper functions
+    function addMessage(text, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+      messageDiv.textContent = text;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
     
     function showTyping() {
       isTyping = true;
@@ -382,215 +590,133 @@
       if (typing) typing.remove();
     }
     
-    function addMessage(text, isUser = false) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-      messageDiv.textContent = text;
-      chatMessages.appendChild(messageDiv);
+    function showQualifiedCTAs() {
+      const ctaDiv = document.createElement('div');
+      ctaDiv.className = 'bot-message message';
+      ctaDiv.innerHTML = `
+        <div class="cta-buttons">
+          <a href="https://calendly.com/jadafig1" class="cta-button" target="_blank">
+            <i class="fas fa-calendar-check"></i> Book Your Call
+          </a>
+          <a href="https://whop.com/checkout/plan_qcjnbDHeUtHg9?d2c=true" class="cta-button" target="_blank">
+            <i class="fas fa-lock"></i> Join Academy
+          </a>
+        </div>
+      `;
+      chatMessages.appendChild(ctaDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
-    function startChat() {
-      profileSection.classList.add('hidden');
-      chatContainer.style.display = 'flex';
+    function showResourceLinks() {
+      const ctaDiv = document.createElement('div');
+      ctaDiv.className = 'bot-message message';
+      ctaDiv.innerHTML = `
+        <div class="cta-buttons">
+          <a href="https://mxdenterprises.com/" class="cta-button" target="_blank">
+            <i class="fas fa-play"></i> Free Training
+          </a>
+          <a href="https://mxdenterprises.com/resources" class="cta-button" target="_blank">
+            <i class="fas fa-book"></i> Growth Resources
+          </a>
+        </div>
+      `;
+      chatMessages.appendChild(ctaDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function determineScenario() {
+      // Check for qualified (Scenario 1)
+      if ((userData.savings === 'yes' && userData.savingsAmount >= 500) || 
+          (userData.credit === 'yes' && userData.savingsAmount >= 500)) {
+        return 'qualified';
+      }
+      
+      // Check for building credit (Scenario 4)
+      if (userData.credit === 'yes') {
+        return 'buildingCredit';
+      }
+      
+      // Check for serious mindset (Scenario 6)
+      if (userData.mindset === 'serious') {
+        return 'seriousMindset';
+      }
+      
+      // Default to unserious mindset (Scenario 7)
+      return 'unseriousMindset';
+    }
+    
+    function processNextStep() {
+      // If we've completed all steps, determine scenario
+      if (currentStep >= conversationFlow.length) {
+        const scenario = determineScenario();
+        scenarioHandlers[scenario](userData);
+        return;
+      }
+      
+      // Handle conditional steps
+      const currentQuestion = conversationFlow[currentStep];
+      if (currentQuestion.condition && !currentQuestion.condition(userData)) {
+        currentStep++;
+        processNextStep();
+        return;
+      }
+      
+      // Show typing indicator
       showTyping();
+      
+      // Ask next question after a short delay
       setTimeout(() => {
         hideTyping();
-        addMessage(questions[step]);
+        const questionText = typeof currentQuestion.question === 'function' 
+          ? currentQuestion.question(userData) 
+          : currentQuestion.question;
+        addMessage(questionText, false);
       }, 1000);
     }
     
-    function processResponse(response) {
-      const lower = response.toLowerCase().trim();
+    function handleUserInput() {
+      const input = userInput.value.trim();
+      if (!input || isTyping) return;
       
-      if (step === 0) {
+      // Add user message to chat
+      addMessage(input, true);
+      userInput.value = '';
+      
+      const currentQ = conversationFlow[currentStep];
+      
+      // Validate input if validator exists
+      if (currentQ.validator && !currentQ.validator(input)) {
         showTyping();
         setTimeout(() => {
           hideTyping();
-          step++;
-          addMessage(questions[step]);
+          addMessage(currentQ.error || "Please try that again", false);
         }, 1000);
         return;
       }
       
-      if (step === 1) {
-        if (!/^[a-zA-Z\s]{2,}$/.test(response)) {
-          showTyping();
-          setTimeout(() => {
-            hideTyping();
-            addMessage("Please enter a valid name (letters only, at least 2 characters)");
-          }, 1000);
-          return;
-        }
-        userData.name = response;
-        showTyping();
-        setTimeout(() => {
-          hideTyping();
-          addMessage(`Nice to meet you, ${response}!`);
-          step++;
-          addMessage(questions[step]);
-        }, 1000);
-        return;
-      }
+      // Store response if store function exists
+      if (currentQ.store) currentQ.store(input);
       
-      if (step === 2) {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(response)) {
-          showTyping();
-          setTimeout(() => {
-            hideTyping();
-            addMessage("Please enter a valid email address");
-          }, 1000);
-          return;
-        }
-        userData.email = response;
-        showTyping();
-        setTimeout(() => {
-          hideTyping();
-          step++;
-          addMessage(questions[step]);
-        }, 1000);
-        return;
-      }
-      
-      if (step === 3) {
-        const age = parseInt(response);
-        if (isNaN(age) || age < 18 || age > 120) {
-          showTyping();
-          setTimeout(() => {
-            hideTyping();
-            addMessage("Please enter a valid age (must be 18+)");
-          }, 1000);
-          return;
-        }
-        userData.age = age;
-        showTyping();
-        setTimeout(() => {
-          hideTyping();
-          step++;
-          addMessage(questions[step]);
-        }, 1000);
-        return;
-      }
-      
-      if (step === 4) {
-        if (!/(yes|yea|yeah|yep|sure|i do|i have|credit|card|\$|\d+)/i.test(lower)) {
-          userData.hasFunds = false;
-          showTyping();
-          setTimeout(() => {
-            hideTyping();
-            addMessage("The program requires $500+ investment. Check back when you're ready!");
-            showMainMenu();
-          }, 1000);
-          return;
-        }
-        userData.hasFunds = true;
-        showTyping();
-        setTimeout(() => {
-          hideTyping();
-          step++;
-          addMessage(questions[step]);
-        }, 1000);
-        return;
-      }
-      
-      if (step === 5) {
-        userData.goal = response;
-        showTyping();
-        setTimeout(() => {
-          hideTyping();
-          step++;
-          addMessage(questions[step]);
-        }, 1000);
-        return;
-      }
-      
-      if (step === 6) {
-        if (!/(morning|afternoon|evening)/i.test(lower)) {
-          showTyping();
-          setTimeout(() => {
-            hideTyping();
-            addMessage("Please choose: morning, afternoon, or evening");
-          }, 1000);
-          return;
-        }
-        userData.schedulePreference = response;
-        showTyping();
-        setTimeout(() => {
-          hideTyping();
-          addMessage(`Perfect! We'll schedule your call for the ${response}.`);
-          showCTAs();
-        }, 1000);
-        return;
-      }
+      // Move to next step
+      currentStep++;
+      processNextStep();
     }
     
-    function showMainMenu() {
-      const html = `
-        <div class="message bot-message">
-          <p>Here are some options for you:</p>
-          <div class="cta-buttons">
-            <a href="https://mxdenterprises.com/" class="cta-button" target="_blank">
-              <i class="fas fa-play"></i> Free Training
-            </a>
-            <a href="https://calendly.com/jadafig1" class="cta-button" target="_blank">
-              <i class="fas fa-calendar-check"></i> Discovery Call
-            </a>
-          </div>
-        </div>
-      `;
-      
-      const messageDiv = document.createElement('div');
-      messageDiv.innerHTML = html;
-      chatMessages.appendChild(messageDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    function showCTAs() {
-      const html = `
-        <div class="message bot-message">
-          <p>You're a great fit for the Aligned Closer Academy! Next steps:</p>
-          <div class="cta-buttons">
-            <a href="https://calendly.com/jadafig1" class="cta-button" target="_blank">
-              <i class="fas fa-calendar-check"></i> Book Your Call
-            </a>
-            <a href="https://whop.com/checkout/plan_qcjnbDHeUtHg9?d2c=true" class="cta-button" target="_blank">
-              <i class="fas fa-lock"></i> Secure Your Spot
-            </a>
-          </div>
-        </div>
-      `;
-      
-      const messageDiv = document.createElement('div');
-      messageDiv.innerHTML = html;
-      chatMessages.appendChild(messageDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    startChatBtn.addEventListener('click', startChat);
+    // Event listeners
+    startChatBtn.addEventListener('click', () => {
+      profileSection.classList.add('hidden');
+      chatContainer.style.display = 'flex';
+      processNextStep();
+    });
     
     backButton.addEventListener('click', () => {
       chatContainer.style.display = 'none';
       profileSection.classList.remove('hidden');
     });
     
-    sendButton.addEventListener('click', () => {
-      const message = userInput.value.trim();
-      if (message && !isTyping) {
-        addMessage(message, true);
-        userInput.value = '';
-        processResponse(message);
-      }
-    });
-    
+    sendButton.addEventListener('click', handleUserInput);
     userInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        const message = userInput.value.trim();
-        if (message && !isTyping) {
-          addMessage(message, true);
-          userInput.value = '';
-          processResponse(message);
-        }
-      }
+      if (e.key === 'Enter') handleUserInput();
     });
   </script>
 </body>
