@@ -5,20 +5,27 @@ const Anthropic = require("@anthropic-ai/sdk");
 
 const app = express();
 
+// Initialize Claude
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
+// Twilio sends form data
 app.use(express.urlencoded({ extended: false }));
 
+// Health check route (IMPORTANT for Fly)
+app.get("/", (req, res) => {
+  res.send("WhatsApp AI Bot is running");
+});
+
+// Webhook route (Twilio hits this)
 app.post("/webhook", async (req, res) => {
   try {
-
     const userMessage = req.body.Body || "Hello";
 
     console.log("Incoming message:", userMessage);
 
-    const response = await anthropic.messages.create({
+    const aiResponse = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 300,
       messages: [
@@ -29,31 +36,31 @@ app.post("/webhook", async (req, res) => {
       ]
     });
 
-    const reply = response.content[0].text;
+    const reply = aiResponse.content[0].text;
 
-    res.type("text/xml");
+    res.set("Content-Type", "text/xml");
     res.send(`
 <Response>
-<Message>${reply}</Message>
+  <Message>${reply}</Message>
 </Response>
 `);
 
   } catch (error) {
+    console.error("Claude error:", error.message);
 
-    console.log("Claude error:", error.message);
-
-    res.type("text/xml");
+    res.set("Content-Type", "text/xml");
     res.send(`
 <Response>
-<Message>Bot is online but AI failed.</Message>
+  <Message>Bot is online but AI failed.</Message>
 </Response>
 `);
-
   }
 });
 
+// Use Fly-assigned port
 const PORT = process.env.PORT || 3000;
 
+// Bind to 0.0.0.0 (REQUIRED for Fly)
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port", PORT);
+  console.log(`Server running on port ${PORT}`);
 });
